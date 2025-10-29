@@ -2,6 +2,7 @@ import pyvisa
 import time
 import csv
 import matplotlib.pyplot as plt
+import numpy as np
 
 # Cambia la dirección GPIB según tu configuración
 GPIB_ADDRESS = 'GPIB0::14::INSTR'  # GPIB0 es el bus, 14 es la dirección del Keithley
@@ -30,7 +31,7 @@ def wait_for_srq(inst):
             continue
         time.sleep(0.2)
 
-def main():
+def main(measure):
     rm = pyvisa.ResourceManager()
     inst = rm.open_resource(GPIB_ADDRESS)
 
@@ -44,36 +45,35 @@ def main():
     send_cmd(inst, "STAT:PRES;*CLS")
     send_cmd(inst, "STAT:MEAS:ENAB 512")
     send_cmd(inst, "*SRE 1")
-    
-    
+
     
     ### ---------------------------------------------------------------------------------------------------- ###
     
     
-    # ### Configurar medicion de corriente
+    ### Configurar medicion de corriente
     
-    
-    # Seleccionamos la funcion corriente
-    send_cmd(inst, 'SENS:FUNC "CURR"')
-    send_cmd(inst, "CONF:CURR")
-    
-    # Desactivamos el zero check and zero correction para mas velocidad pero menos precision
-    send_cmd(inst, "SYST:ZCH OFF")
-    send_cmd(inst, "SYST:ZCOR OFF")
-    
-    # Desactivamos el auto zero para augmentar la velocidad pero menos precision
-    send_cmd(inst, "SYST:AZER OFF")
-    
-    # Ponemos el rango fijo (si no esta fijo hay trompicones por el cambio de rango entre mediciones)
-    send_cmd(inst, "CURR:RANG:AUTO OFF")
-    send_cmd(inst, "CURR:RANG 200E-6")
-    
-    # Establecemos el tiempo de integracion
-    send_cmd(inst, "CURR:NPLC 0.01")  # 1 ciclo de red = equilibrio entre precisión y velocidad, minimo 0.01
-    
-    
-    send_cmd(inst, "MED OFF")
-    send_cmd(inst, "AVER OFF")
+    if measure == "current":
+        # Seleccionamos la funcion corriente
+        send_cmd(inst, 'SENS:FUNC "CURR"')
+        send_cmd(inst, "CONF:CURR")
+        
+        # Desactivamos el zero check and zero correction para mas velocidad pero menos precision
+        send_cmd(inst, "SYST:ZCH OFF")
+        send_cmd(inst, "SYST:ZCOR OFF")
+        
+        # Desactivamos el auto zero para augmentar la velocidad pero menos precision
+        send_cmd(inst, "SYST:AZER OFF")
+        
+        # Ponemos el rango fijo (si no esta fijo hay trompicones por el cambio de rango entre mediciones)
+        send_cmd(inst, "CURR:RANG:AUTO OFF")
+        send_cmd(inst, "CURR:RANG 200E-6")
+        
+        # Establecemos el tiempo de integracion
+        send_cmd(inst, "CURR:NPLC 0.01")  # 1 ciclo de red = equilibrio entre precisión y velocidad, minimo 0.01
+        
+        
+        send_cmd(inst, "MED OFF")
+        send_cmd(inst, "AVER OFF")
     
     
     
@@ -82,28 +82,28 @@ def main():
     
     # ### Configurar medicion de voltaje
     
-    
-    # # Seleccionamos la funcion corriente
-    # send_cmd(inst, 'SENS:FUNC "VOLT"')
-    # send_cmd(inst, "CONF:VOLT")
-    
-    # # Desactivamos el zero check and zero correction para mas velocidad pero menos precision
-    # send_cmd(inst, "SYST:ZCH OFF")
-    # send_cmd(inst, "SYST:ZCOR OFF")
-    
-    # # Desactivamos el auto zero para augmentar la velocidad pero menos precision
-    # send_cmd(inst, "SYST:AZER ON")
-    
-    # # Ponemos el rango fijo (si no esta fijo hay trompicones por el cambio de rango entre mediciones)
-    # send_cmd(inst, "VOLT:RANG:AUTO OFF")
-    # send_cmd(inst, "VOLT:RANG 200")
-    
-    # # Establecemos el tiempo de integracion
-    # send_cmd(inst, "VOLT:NPLC 0.01")  # 1 ciclo de red = equilibrio entre precisión y velocidad, minimo 0.01
-    
-    
-    # send_cmd(inst, "MED OFF")
-    # send_cmd(inst, "AVER OFF")
+    elif measure == "voltage":
+        # Seleccionamos la funcion corriente
+        send_cmd(inst, 'SENS:FUNC "VOLT"')
+        send_cmd(inst, "CONF:VOLT")
+        
+        # Desactivamos el zero check and zero correction para mas velocidad pero menos precision
+        send_cmd(inst, "SYST:ZCH OFF")
+        send_cmd(inst, "SYST:ZCOR OFF")
+        
+        # Desactivamos el auto zero para augmentar la velocidad pero menos precision
+        send_cmd(inst, "SYST:AZER OFF")
+        
+        # Ponemos el rango fijo (si no esta fijo hay trompicones por el cambio de rango entre mediciones)
+        send_cmd(inst, "VOLT:RANG:AUTO OFF")
+        send_cmd(inst, "VOLT:RANG 200")
+        
+        # Establecemos el tiempo de integracion
+        send_cmd(inst, "VOLT:NPLC 0.01")  # 1 ciclo de red = equilibrio entre precisión y velocidad, minimo 0.01
+        
+        
+        send_cmd(inst, "MED OFF")
+        send_cmd(inst, "AVER OFF")
 
 
     ### ---------------------------------------------------------------------------------------------------- ###
@@ -116,30 +116,31 @@ def main():
     
     ### Configurar medicion de carga
     
-    
-    # # Seleccionamos la funcion corriente
-    # send_cmd(inst, 'SENS:FUNC "CHAR"')
-    # send_cmd(inst, "CONF:CHAR")
-    
-    # # Desactivamos el zero check and zero correction para mas velocidad pero menos precision
-    # send_cmd(inst, "SYST:ZCH OFF")
-    # send_cmd(inst, "SYST:ZCOR OFF")
-    
-    # # Desactivamos el auto zero para augmentar la velocidad pero menos precision
-    # send_cmd(inst, "SYST:AZER OFF")
-    
-    # # Ponemos el rango fijo (si no esta fijo hay trompicones por el cambio de rango entre mediciones)
-    # send_cmd(inst, "CHAR:RANG:AUTO OFF")
-    # send_cmd(inst, "CHAR:RANG 200E-9")
-    
-    # # Establecemos el tiempo de integracion
-    # send_cmd(inst, "CHAR:NPLC 0.01")  # 1 ciclo de red = equilibrio entre precisión y velocidad, minimo 0.01
+    elif measure == "charge":
+        # Seleccionamos la funcion corriente
+        send_cmd(inst, 'SENS:FUNC "CHAR"')
+        send_cmd(inst, "CONF:CHAR")
+        
+        # Desactivamos el zero check and zero correction para mas velocidad pero menos precision
+        send_cmd(inst, "SYST:ZCH OFF")
+        send_cmd(inst, "SYST:ZCOR OFF")
+        
+        # Desactivamos el auto zero para augmentar la velocidad pero menos precision
+        send_cmd(inst, "SYST:AZER OFF")
+        
+        # Ponemos el rango fijo (si no esta fijo hay trompicones por el cambio de rango entre mediciones)
+        send_cmd(inst, "CHAR:RANG:AUTO OFF")
+        send_cmd(inst, "CHAR:RANG 200E-9")
+        
+        # Establecemos el tiempo de integracion
+        send_cmd(inst, "CHAR:NPLC 0.01")  # 1 ciclo de red = equilibrio entre precisión y velocidad, minimo 0.01
 
 
 
     ### ---------------------------------------------------------------------------------------------------- ###
     
-    
+    else:
+        raise Exception("Error invalid measure parameter")
 
     # Ajustamos los digitos de la pantalla y la desactivamos para augmentar el sampling rate
     send_cmd(inst, "DISP:DIG 4.5")
@@ -175,29 +176,43 @@ def main():
         print("Error al procesar los datos:", reading_data)
         values = []
 
-    print("\nPara repetir, reactiva el buffer con: FEED:CONT NEXT")
-    send_cmd(inst, "FEED:CONT NEXT")
+    # print("\nPara repetir, reactiva el buffer con: FEED:CONT NEXT")
+    # send_cmd(inst, "FEED:CONT NEXT")
 
     inst.close()
     return values
 
 if __name__ == "__main__":
-    values = main()
+    
+    measure = "current" # It can be current, voltage, charge
+    param_name = {"voltage":"Voltage (V)", "current":"Current (A)", "charge":"Coulombs (uC)"}
+    
+    values = main(measure)
 
     # Separar los datos en lecturas, timestamps y estados si están intercalados
     read, timestamp, status = values[0::3], values[1::3], values[2::3]
+    
+    diff_time = timestamp[1] - timestamp[0]
+    timestamp_aux = np.linspace(0, diff_time * 2499, 2500)
 
     with open('CSV_File.csv', mode='w', newline='') as file:
         writer = csv.writer(file)
 
         # Escribir encabezados
-        writer.writerow(['Time (s)', 'Current (A)'])
+        writer.writerow(['Time (s)', param_name[measure]])
 
         # Escribir filas
-        for timestamp_val, current_val in zip(timestamp, read):
+        for timestamp_val, current_val in zip(timestamp_aux, read):
             writer.writerow([timestamp_val, current_val])
-            
-            
-    plt.figure(0)
-    plt.plot(timestamp, read)
+
+# %%
+
+    plt.figure()
+    plt.plot(timestamp_aux, read)
+    plt.xlabel("Time (s)")
+    plt.ylabel(param_name[measure])
+    plt.tight_layout()
+    plt.show()
+    
+    
 
